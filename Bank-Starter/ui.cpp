@@ -75,13 +75,13 @@ void DeleteAccount(){
     string accountNumber = GetAccountNumberFromUser();
 
     try{
-       Account a = LoadAccount(accountNumber);
+       Account test = LoadAccount(accountNumber);
        }catch(string s){
        	cout << s;
        	return;
        }
 
-    a.DeleteAccount(accountNumber);
+    test.DeleteAccount(accountNumber);
     cout<<"Account deleted" <<endl;
 }
 

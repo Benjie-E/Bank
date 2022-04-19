@@ -10,8 +10,8 @@ public:
 	void UpdateAccount(std::string accountNumber, std::string name);
 	float GetBalance();
 	void UpdateBalance(float balance);
-	void DeleteAccount();
-	bool IsValidAccount();
+	//void DeleteAccount();
+	//bool IsValidAccount();
 	std::string accountId;
 		float balance;
 		std::string phone;
