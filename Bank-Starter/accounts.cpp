@@ -2,6 +2,7 @@
 #include <fstream>
 #include <sstream>
 
+#include "accounts.h"
 using namespace std;
 
 const string PATH_PREFIX = "data/";
@@ -56,7 +57,7 @@ void UpdateAccount(string accountNumber, string newName){
     fout.close();
 }
 
-float GetBalance(string accountId){
+float Account::GetBalance(){
     ifstream fin (PATH_PREFIX +  accountId + ".dat");
 
     // If the file does not exist, assume a balance of zero
@@ -115,7 +116,7 @@ void DeleteAccount(string accountToDelete)
     fout.close();
 }
 
-void GetAccount(std::string accountNumber, std::string &ssn, std::string &name, std::string &address, std::string &phone){
+Account Account::GetAccount(std::string accountNumber){
     ifstream fin(ACCOUNT_FILE_NAME);
 
     while(!fin.eof()) {
@@ -136,13 +137,13 @@ void GetAccount(std::string accountNumber, std::string &ssn, std::string &name, 
         getline(fin, _phone);
 
         if(_accountNumber == accountNumber){
-            ssn  = _ssn;
-            name = _name;
-            address = _address;
-            phone = _phone;
+        	Account a=Account(_accountNumber,_ssn,_name,_address,_phone);
+        	fin.close();
+        	return a;
         }
     }
     fin.close();
+    throw string("invalidAccount");
 }
 
 bool IsValidAccount(string accountId){

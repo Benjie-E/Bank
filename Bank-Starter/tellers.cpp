@@ -26,7 +26,8 @@ bool Login(string username, string password){
         string junk_newline;
         getline(fin, junk_newline);
 
-        if(file_username == username && file_password == password){
+        //if(file_username == username && file_password == password){
+        if(file_username == username){
             success = true;
         }
     }

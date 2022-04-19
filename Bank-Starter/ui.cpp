@@ -48,11 +48,12 @@ bool LoginUser(){
 
 void AddAccount(){
     string accountNumber = GetAccountNumberFromUser();
-    if(IsValidAccount(accountNumber)){
-        cout <<"Account number already exists" << endl;
-        return;
+    //flip this
+    try{
+    Account test = LoadAccount(accountNumber);
+    }catch(string s){
+    	cout << s;
     }
-
     string ssn {""};
     string name {""};
     string address {""};
@@ -73,12 +74,14 @@ void AddAccount(){
 void DeleteAccount(){
     string accountNumber = GetAccountNumberFromUser();
 
-    if(!IsValidAccount(accountNumber)){
-        cout<<"Account not found" << endl;
-        return;
-    }
+    try{
+       Account a = LoadAccount(accountNumber);
+       }catch(string s){
+       	cout << s;
+       	return;
+       }
 
-    DeleteAccount(accountNumber);
+    a.DeleteAccount(accountNumber);
     cout<<"Account deleted" <<endl;
 }
 
@@ -102,59 +105,46 @@ void UpdateAccount(){
 void ViewAccount(){
     string accountNumber = GetAccountNumberFromUser();
    
-    if(!IsValidAccount(accountNumber)){
-        cout<<"Account not found" << endl;
-        return;
-    }
-
-    string ssn {""};
-    string name {""};
-    string address {""};
-    string phone {""};
-
-    GetAccount(accountNumber, ssn, name, address, phone);
-
-    cout << setw(10) << right << "SSN:" << ssn << endl;
-    cout << setw(10) << right << "Name: " << name << endl;
-    cout << setw(10) << right << "Address: " << address << endl;
-    cout << setw(10) << right << "Phone: " << phone << endl;
-    cout << setw(10) << right << "Balance: " << setprecision(2) << fixed << GetBalance(accountNumber) << endl;
+//    if(!IsValidAccount(accountNumber)){
+//        cout<<"Account not found" << endl;
+//        return;
+//    }
+    Account a = Account::GetAccount(accountNumber);
+    cout << setw(10) << right << "SSN:" << a.ssn << endl;
+    cout << setw(10) << right << "Name: " << a.name << endl;
+    cout << setw(10) << right << "Address: " << a.address << endl;
+    cout << setw(10) << right << "Phone: " << a.phone << endl;
+    cout << setw(10) << right << "Balance: " << setprecision(2) << fixed << a.GetBalance() << endl;
 }
 
 void Deposit(){
     string accountNumber = GetAccountNumberFromUser();
 
-    if(!IsValidAccount(accountNumber)){
-        cout<<"Account not found" << endl;
-        return;
-    }
+    Account a = LoadAccount(accountNumber);
 
-    float currentBalance = GetBalance(accountNumber);
+    float currentBalance = a.GetBalance();
     float depositAmount {0.0};
     
     cout<< "Current Balance: " << setprecision(2) << fixed << currentBalance << endl;
     cout<< "Deposit Amount: ";
     depositAmount = GetCurrencyFromUser();
-    UpdateBalance(accountNumber, currentBalance+depositAmount);
-    cout << "Balance Updated: " << setprecision(2) << fixed << GetBalance(accountNumber) << endl;
+    a.UpdateBalance(currentBalance+depositAmount);
+    cout << "Balance Updated: " << setprecision(2) << fixed << a.GetBalance() << endl;
 }
 
 void Withdraw(){
     string accountNumber = GetAccountNumberFromUser();
     
-    if(!IsValidAccount(accountNumber)){
-        cout<<"Account not found" << endl;
-        return;
-    }
+    Account a = LoadAccount(accountNumber);
 
-    float currentBalance = GetBalance(accountNumber);
+    float currentBalance = a.GetBalance();
     float widthdrawAmount {0.0};
     
     cout<< "Current Balance: " << setprecision(2) << fixed << currentBalance << endl;
     cout<< "Deposit Amount: ";
     widthdrawAmount = GetCurrencyFromUser();
-    UpdateBalance(accountNumber, currentBalance - widthdrawAmount);
-    cout << "Balance Updated: " << setprecision(2) << fixed << GetBalance(accountNumber) << endl;
+    a.UpdateBalance(currentBalance - widthdrawAmount);
+    cout << "Balance Updated: " << setprecision(2) << fixed << a.GetBalance() << endl;
 }
 
 void AccountMenu(){
@@ -236,4 +226,8 @@ string SafeGetLine(){
     string value {""};
     getline(cin, value);
     return value;
+}
+
+Account LoadAccount(string accountId){
+
 }

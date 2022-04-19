@@ -16,5 +16,6 @@ void Deposit();
 void Withdraw();
 void AccountMenu();
 void MainMenu();
+Account LoadAccount(string accountId);
 
 std::string SafeGetLine();
