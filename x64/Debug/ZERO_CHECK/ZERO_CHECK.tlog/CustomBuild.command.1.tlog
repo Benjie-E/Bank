@@ -1,0 +1,10 @@
+^C:\USERS\BENJIE\SOURCE\REPOS\BANK\BANK\CMAKEFILES\5B60CE73B2F4AA97FD517C7369076160\GENERATE.STAMP.RULE
+setlocal
+"C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\bin\cmake.exe" -SC:/Users/Benjie/source/repos/Bank/Bank -BC:/Users/Benjie/source/repos/Bank/Bank --check-stamp-list CMakeFiles/generate.stamp.list --vs-solution-file C:/Users/Benjie/source/repos/Bank/Bank/Module-11-Bank-Starter.sln
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal & call :cmErrorLevel %errorlevel% & goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd
