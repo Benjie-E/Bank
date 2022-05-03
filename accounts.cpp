@@ -97,8 +97,8 @@ float Account::GetBalance(){
     }
 }
 
-void AccountManager::UpdateBalance(Account account, float balance){
-    ofstream fout(PATH_PREFIX +  account.accountNumber + ".dat");
+void Account::UpdateBalance(float balance){
+    ofstream fout(PATH_PREFIX +  accountNumber + ".dat");
     fout << balance << endl;
     fout.close();
 }

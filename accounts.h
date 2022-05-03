@@ -17,7 +17,6 @@
  database for the purpose of future plagiarism checking)
  */
 #pragma once
-
 #include <string>
 #include "transaction.h"
 class Account {
@@ -29,6 +28,10 @@ public:
 	std::string phone;
 	float balance = GetBalance();
 	float GetBalance();
+	void UpdateBalance(float balance);
+	void operator+=(const float amount) { UpdateBalance(GetBalance()-amount); };
+	void operator-=(const float amount) { UpdateBalance(GetBalance()-amount); };
+	
 };
 enum class UpdateType {
 	name,
@@ -41,7 +44,7 @@ public:
 	static void AddAccount(std::string accountNumber, std::string ssn, std::string name, std::string address, std::string phone);
 	static Account GetAccount(std::string accountNumber);
 	static bool UpdateAccount(Account account);
-	static void UpdateBalance(Account account, float balance);
+	
 	static void DeleteAccount(Account account);
 	static bool IsValidAccount(std::string accountNumber);
 	static void AddTransaction(Account account, Transaction *transaction);

@@ -210,14 +210,14 @@ void UI::ViewTransactions() {
             break;
         case OPTIONS::DEPOSITS:
             for (Transaction* t : transactions) {
-                if (t->type = DEPOSIT) {
+                if (t->type == DEPOSIT) {
                     cout << t->print() << endl;
                 }
             }
             break;
         case OPTIONS::WITHDRAWLS:
             for (Transaction* t : transactions) {
-                if (t->type = WITHDRAWL) {
+                if (t->type == WITHDRAWL) {
                     cout << t->print() << endl;
                 }
             }
@@ -255,7 +255,7 @@ void UI::DepositUI(){
     AccountManager::AddTransaction(account, toFile);
     delete toFile;
 
-    AccountManager::UpdateBalance(account, currentBalance+depositAmount);
+    account+=depositAmount;
     cout << "Balance Updated: " << setprecision(2) << fixed << account.GetBalance() << endl;
 }
 
@@ -289,7 +289,7 @@ void UI::WithdrawlUI(){
     Transaction *toFile= new Withdrawl(withdrawAmount);
     AccountManager::AddTransaction(account, toFile);
     delete toFile;
-    AccountManager::UpdateBalance(account, currentBalance - withdrawAmount);
+    account+=withdrawAmount;
     cout << "Balance Updated: " << setprecision(2) << fixed << account.GetBalance() << endl;
 }
 
