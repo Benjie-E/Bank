@@ -19,5 +19,10 @@ public:
 	static void AccountMenu();
 	static void MainMenu();
 
+	static void UpdateName();
+	static void UpdateSSN();
+	static void UpdatePhone();
+	static void UpdateAddress();
+
 	static std::string SafeGetLine();
 };

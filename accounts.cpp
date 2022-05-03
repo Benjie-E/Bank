@@ -2,6 +2,7 @@
 #include <fstream>
 #include <sstream>
 #include <iostream>
+#include <regex>
 #include "accounts.h"
 using namespace std;
 
@@ -9,7 +10,6 @@ extern const string PATH_PREFIX = "data/";
 const string ACCOUNT_FILE_NAME = PATH_PREFIX + "accounts.dat";
 
 void AccountManager::AddAccount(string accountNumber, string ssn, string name, string address, string phone){
-
     ofstream fout;
     fout.open(ACCOUNT_FILE_NAME, ios::app );
 
@@ -22,13 +22,12 @@ void AccountManager::AddAccount(string accountNumber, string ssn, string name, s
     fout.close();
 }
 
-void AccountManager::UpdateAccount(Account account, string newName){
+bool AccountManager::UpdateAccount(Account account){
     ifstream fin(ACCOUNT_FILE_NAME);
-
     // we'll rewrite out file to here since we have it open
     // when done, overwrite with the stringstream data.
     stringstream sout;
-
+    bool done = false;
     while(!fin.eof()){
         string _accountNumber {""};
         string _ssn {""};
@@ -42,11 +41,14 @@ void AccountManager::UpdateAccount(Account account, string newName){
         getline(fin, _address);
         getline(fin, _phone);
 
+        if (_accountNumber == account.accountNumber) {
+            done = true;
+        }
         sout << _accountNumber << endl;
-        sout << _ssn << endl;
-        sout << (_accountNumber == account.accountNumber ? newName : _name) << endl;
-        sout << _address << endl;
-        sout << _phone <<endl;
+        sout << (_accountNumber == account.accountNumber ? account.ssn : _ssn) << endl;
+        sout << (_accountNumber == account.accountNumber ? account.name : _name) << endl;
+        sout << (_accountNumber == account.accountNumber ? account.address : _address) << endl;
+        sout << (_accountNumber == account.accountNumber ? account.phone : _phone) <<endl;
     }
 
     fin.close();
@@ -55,6 +57,7 @@ void AccountManager::UpdateAccount(Account account, string newName){
     fout.open(ACCOUNT_FILE_NAME);
     fout << sout.str();
     fout.close();
+    return done;
 }
 
 float Account::GetBalance(){
@@ -187,4 +190,24 @@ void AccountManager::AddTransaction(Account account, Transaction *transaction) {
     fout.open(PATH_PREFIX + account.accountNumber + "-t.dat", ios::app);
     fout << transaction->printToFile();
     fout.close();
+}
+
+bool AccountManager::ValidSSN(string ssn)
+{
+    if (!std::regex_match(ssn, regex("[[:digit:]]{3}-[[:digit:]]{2}-[[:digit:]]{4}"))) {
+        cout << "Invalid SSN" << endl;
+        cout << "Try XXX-XX-XXXX" << endl;
+        return false;
+    }
+    return true;
+}
+
+bool AccountManager::ValidPhone(string phone)
+{
+    if (!std::regex_match(phone, regex("[[:digit:]]{3}-[[:digit:]]{3}-[[:digit:]]{4}"))) {
+        cout << "Invalid Phone Number" << endl;
+        cout << "Try XXX-XXX-XXXX" << endl;
+        return false;
+    }
+    return true;
 }

@@ -3,7 +3,7 @@
 #include <string>
 #include "tellers.h"
 using namespace std;
-
+const string PATH_PREFIX = "data/";
 const string TELLER_FILE_NAME="data/tellers.dat";
 
 bool Login(Teller teller){

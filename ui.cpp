@@ -12,9 +12,12 @@ using namespace std;
 int UI::GetNumberFromUser(int minValue, int maxValue){
     int value;
     
-    do{
+    do {
         cout << "=>";
-        cin >> value;
+        if (!(cin >> value)) {
+            cin.clear();
+            cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+        }
     } while(value <= minValue || value >= maxValue);
     string junkNewLine{};
     getline(cin, junkNewLine);
@@ -60,15 +63,18 @@ void UI::AddAccount(){
     string address {""};
     string phone {""};
 
-    cout << "SSN: ";
-    ssn = UI::SafeGetLine();
+    do {
+        cout << "SSN: ";
+        ssn = UI::SafeGetLine();
+    } while (!AccountManager::ValidSSN(ssn));
     cout << "Name: ";
     name = UI::SafeGetLine();
     cout << "Address: ";
     address = UI::SafeGetLine();
-    cout << "Phone: ";
-    phone = UI::SafeGetLine();
-
+    do {
+        cout << "Phone: ";
+        phone = UI::SafeGetLine();
+    } while (!AccountManager::ValidPhone(phone));
     AccountManager::AddAccount(accountNumber, ssn, name, address, phone);
 }
 
@@ -85,17 +91,41 @@ void UI::DeleteAccount(){
 }
 
 void UI::UpdateAccount(){
-    string accountNumber = UI::GetAccountNumberFromUser();
+    enum OPTIONS {
+        MIN = 0,
+        SSN,
+        NAME,
+        ADDRESS,
+        PHONE,
+        RETURN,
+        MAX
+    };
 
-    Account account = AccountManager::GetAccount(accountNumber);
+    int value;
+    do {
+        cout << OPTIONS::SSN << "- Update SSN" << endl;
+        cout << OPTIONS::NAME << "- Update name" << endl;
+        cout << OPTIONS::ADDRESS << "- Update address" << endl;
+        cout << OPTIONS::PHONE << "- Update phone number" << endl;
+        
+        cout << OPTIONS::RETURN << "- Return" << endl;
+        value = UI::GetNumberFromUser(OPTIONS::MIN, OPTIONS::MAX);
 
-    string name {""};
-
-    cout << "Name: ";
-    name = UI::SafeGetLine();
-    
-    AccountManager::UpdateAccount(account, name);
-    cout<<"Account updated" <<endl;
+        switch (value) {
+        case OPTIONS::SSN:
+            UI::UpdateSSN();
+            break;
+        case OPTIONS::NAME:
+            UI::UpdateName();
+            break;
+        case OPTIONS::ADDRESS:
+            UI::UpdateAddress();
+            break;
+        case OPTIONS::PHONE:
+            UI::UpdatePhone();
+            break;
+        }
+    } while (value != OPTIONS::RETURN);
 }
 
 void UI::ViewAccount(){
@@ -126,9 +156,46 @@ void UI::ViewTransactions() {
     string accountNumber = UI::GetAccountNumberFromUser();
     extern const string PATH_PREFIX;
     vector<Transaction*> transactions = TransactionManager::extractTransactions(PATH_PREFIX + accountNumber + "-t.dat");
-    for (Transaction *t : transactions) {
-        cout << t->print()<<endl;
-    }
+    
+    enum OPTIONS {
+        MIN = 0,
+        ALL,
+        DEPOSITS,
+        WITHDRAWLS,
+        RETURN,
+        MAX
+    };
+
+    int value;
+    do {
+        cout << OPTIONS::ALL << "- Show all transactions" << endl;
+        cout << OPTIONS::DEPOSITS << "- Show only deposits" << endl;
+        cout << OPTIONS::WITHDRAWLS << "- Show only withdrawls" << endl;
+        cout << OPTIONS::RETURN << "- Return" << endl;
+        value = UI::GetNumberFromUser(OPTIONS::MIN, OPTIONS::MAX);
+
+        switch (value) {
+        case OPTIONS::ALL:
+            for (Transaction* t : transactions) {
+                cout << t->print() << endl;
+            }
+            break;
+        case OPTIONS::DEPOSITS:
+            for (Transaction* t : transactions) {
+                if (t->type = DEPOSIT) {
+                    cout << t->print() << endl;
+                }
+            }
+            break;
+        case OPTIONS::WITHDRAWLS:
+            for (Transaction* t : transactions) {
+                if (t->type = WITHDRAWL) {
+                    cout << t->print() << endl;
+                }
+            }
+            break;
+        }
+    } while (value != OPTIONS::RETURN);
 }
 
 void UI::DepositUI(){
@@ -148,7 +215,14 @@ void UI::DepositUI(){
     cout<< "Current Balance: " << setprecision(2) << fixed << currentBalance << endl;
     cout<< "Deposit Amount: ";
     depositAmount = UI::GetCurrencyFromUser();
-
+    while (depositAmount < 0) {
+        cout << "Please enter a positive value" << endl;
+        depositAmount = UI::GetCurrencyFromUser();
+    }
+    if (currentBalance + depositAmount < 0) {
+        cout << "Insufficient funds" << endl;
+        return;
+    }
     Transaction *toFile = new Deposit(depositAmount);
     AccountManager::AddTransaction(account, toFile);
     delete toFile;
@@ -171,16 +245,23 @@ void UI::WithdrawlUI(){
     
 
     float currentBalance = account.GetBalance();
-    float widthdrawAmount {0.0};
+    float withdrawAmount {0.0};
     
     cout<< "Current Balance: " << setprecision(2) << fixed << currentBalance << endl;
     cout<< "Withdrawl Amount: ";
-    widthdrawAmount = UI::GetCurrencyFromUser();
-
-    Transaction *toFile= new Withdrawl(widthdrawAmount);
+    withdrawAmount = UI::GetCurrencyFromUser();
+    while (withdrawAmount < 0) {
+        cout << "Please enter a positive value" << endl;
+        withdrawAmount = UI::GetCurrencyFromUser();
+    }
+    if (currentBalance - withdrawAmount < 0) {
+        cout << "Insufficient funds" << endl;
+        return;
+    }
+    Transaction *toFile= new Withdrawl(withdrawAmount);
     AccountManager::AddTransaction(account, toFile);
     delete toFile;
-    AccountManager::UpdateBalance(account, currentBalance - widthdrawAmount);
+    AccountManager::UpdateBalance(account, currentBalance - withdrawAmount);
     cout << "Balance Updated: " << setprecision(2) << fixed << account.GetBalance() << endl;
 }
 
@@ -262,6 +343,96 @@ void UI::MainMenu(){
                 break;
         }
     }while(value != OPTIONS::EXIT);
+}
+
+void UI::UpdateName()
+{
+    string accountNumber = UI::GetAccountNumberFromUser();
+
+    Account account;
+    try {
+        account = AccountManager::GetAccount(accountNumber);
+    }
+    catch (exception& e) {
+        std::cout << e.what() << endl;
+        return;
+    }
+
+    string name{ "" };
+
+    cout << "Name: ";
+    name = UI::SafeGetLine();
+    account.name = name;
+    cout << AccountManager::UpdateAccount(account) ? "Account updated" : "Update failed";
+}
+
+void UI::UpdateSSN()
+{
+    string accountNumber = UI::GetAccountNumberFromUser();
+
+    Account account;
+    try {
+        account = AccountManager::GetAccount(accountNumber);
+    }
+    catch (exception& e) {
+        std::cout << e.what() << endl;
+        return;
+    }
+
+    string ssn{ "" };
+    do {
+        cout << "SSN: ";
+        ssn = UI::SafeGetLine();
+    } while (!AccountManager::ValidSSN(ssn));
+    account.ssn = ssn;
+    AccountManager::UpdateAccount(account);
+    cout << AccountManager::UpdateAccount(account) ? "Account updated" : "Update failed";
+}
+
+void UI::UpdatePhone()
+{
+    string accountNumber = UI::GetAccountNumberFromUser();
+
+    Account account;
+    try {
+        account = AccountManager::GetAccount(accountNumber);
+    }
+    catch (exception& e) {
+        std::cout << e.what() << endl;
+        return;
+    }
+
+    string phone{ "" };
+    do {
+        cout << "Phone: ";
+        phone = UI::SafeGetLine();
+    } while (!AccountManager::ValidPhone(phone));
+    
+
+    account.phone = phone;
+    AccountManager::UpdateAccount(account);
+    cout << AccountManager::UpdateAccount(account) ? "Account updated" : "Update failed";
+}
+
+void UI::UpdateAddress()
+{
+    string accountNumber = UI::GetAccountNumberFromUser();
+    Account account;
+    try {
+        account = AccountManager::GetAccount(accountNumber);
+    }
+    catch (exception& e) {
+        std::cout << e.what() << endl;
+        return;
+    }
+
+    string address{ "" };
+
+    cout << "Address: ";
+    address = UI::SafeGetLine();
+    account.address = address;
+    AccountManager::UpdateAccount(account);
+    cout << AccountManager::UpdateAccount(account) ? "Account updated" : "Update failed";
 }
 
 string UI::SafeGetLine(){
