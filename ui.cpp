@@ -51,10 +51,20 @@ float UI::GetCurrencyFromUser(){
 }
 
 string UI::GetAccountNumberFromUser(){
-    string accountNumber{""};
+    int accountNumber=-1;
     cout << "Account Number: ";
-    getline(cin, accountNumber);
-    return accountNumber;
+    do {
+        if (!(cin >> accountNumber)) {
+            cout << "Must be a number: ";
+            cin.clear();
+            cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+            accountNumber = -1;
+        }
+    } while (accountNumber < 0);
+    string junkNewLine{};
+    getline(cin, junkNewLine);
+    
+    return std::to_string(accountNumber);
 }
 
 bool UI::LoginUser(){
